@@ -1,6 +1,12 @@
 # Starship
 eval "$(starship init zsh)"
 
+# Nvim
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+
+# FZF
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # Shell history size
 HISTSIZE=1000
 HISTFILESIZE=1000
