@@ -15,6 +15,53 @@ HISTFILESIZE=1000
 export EDITOR="nvim"
 export VISUAL="$EDITOR"
 
+# Find and replace command.
+# Usage:
+#   fr <directory> "<find>" "<replace>"      # Preview
+#   fr -a <directory> "<find>" "<replace>"   # Apply changes
+fr() {
+  local apply=false
+
+  if [[ "$1" == "-a" ]]; then
+    apply=true
+    shift
+  fi
+
+  local directory="$1"
+  local find_pattern="$2"
+  local replace_pattern="$3"
+
+  # Guard: -a is only valid as the first argument.
+  if [[ "$directory" == "-a" || "$find_pattern" == "-a" || "$replace_pattern" == "-a" ]]; then
+    echo "Error: -a must be the first argument."
+    echo
+    echo "Usage:"
+    echo "  fr <directory> \"find\" \"replace\""
+    echo "  fr -a <directory> \"find\" \"replace\""
+    return 1
+  fi
+
+  if [[ -z "$directory" || -z "$find_pattern" || -z "$replace_pattern" ]]; then
+    echo "Usage:"
+    echo "  fr <directory> \"find\" \"replace\""
+    echo "  fr -a <directory> \"find\" \"replace\""
+    return 1
+  fi
+
+  if [[ ! -d "$directory" ]]; then
+    echo "Directory not found: $directory"
+    return 1
+  fi
+
+if $apply; then
+    find "$directory" -type f -exec sed -i "s|$find_pattern|$replace_pattern|g" {} \;
+  else
+    find "$directory" -type f | while read -r file; do
+      diff -u "$file" <(sed "s|$find_pattern|$replace_pattern|g" "$file")
+    done
+  fi
+}
+
 # Clipboard alias
 alias clip='xclip -selection clipboard'
 
@@ -85,3 +132,11 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 autoload bashcompinit && bashcompinit
 autoload -Uz compinit && compinit
 complete -C '/usr/local/bin/aws_completer' aws
+
+# pnpm
+export PNPM_HOME="/home/josaelprz/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
